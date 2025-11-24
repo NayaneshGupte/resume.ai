@@ -41,7 +41,8 @@ export default function Home() {
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      toast.error("An error occurred while analyzing the resume.");
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
       setIsProcessing(false);
       setIsAnalyzing(false);
     }
