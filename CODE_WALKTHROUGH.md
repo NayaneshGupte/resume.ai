@@ -22,6 +22,14 @@ This guide explains the structure, flow, and key technical decisions of the Resu
 - **`src/types/`**: TypeScript definitions.
     - `resume.ts`: Shared interfaces for Resume and Analysis data.
 - **`src/prompts/`**: Text files containing the system prompts for the AI.
+- **`src/__tests__/`**: Unit tests for components using Jest and React Testing Library.
+- **`e2e/`**: End-to-end tests using Playwright.
+- **Configuration Files**:
+    - `jest.config.js`, `jest.setup.js`: Jest testing configuration.
+    - `playwright.config.ts`: Playwright E2E testing configuration.
+    - `next.config.ts`: Next.js configuration (Turbopack setup).
+    - `.env.local`: Local environment variables (gitignored).
+    - `.env.example`: Template for environment variables.
 
 ## 2. Key Workflows
 
@@ -78,3 +86,43 @@ Prompts are stored as `.txt` files in `src/prompts/`.
 We use Zustand with `persist` middleware.
 - **Persistence**: Ensures that if the user refreshes the dashboard, their analysis results are not lost.
 - **Simplicity**: Minimal boilerplate compared to Redux or Context API.
+
+### Dynamic Imports for Client-Only Code
+The parser module uses browser-specific APIs (pdfjs-dist, tesseract.js).
+- **SSR Compatibility**: We use dynamic imports in `page.tsx` to prevent server-side execution.
+- **Build Optimization**: Ensures the app builds successfully with Next.js 16 Turbopack.
+
+## 4. Testing Framework
+
+### Unit Tests (Jest + React Testing Library)
+**Location**: `src/__tests__/`
+
+We test individual components in isolation:
+- **FileUpload**: Verifies upload UI, file type validation, and loading states.
+- **ScoreGauge**: Tests score visualization and dynamic value updates.
+- **InsightCard**: Validates feedback display, suggestions, and status indicators.
+
+**Run tests**:
+```bash
+npm run test          # Run all unit tests
+npm run test:watch    # Watch mode for development
+npm run test:coverage # Generate coverage report
+```
+
+### E2E Tests (Playwright)
+**Location**: `e2e/`
+
+Browser-based tests for complete user flows:
+- Homepage rendering and navigation
+- File upload interactions
+- Privacy message visibility
+- Dashboard data display
+
+**Run E2E tests**:
+```bash
+npm run test:e2e      # Run E2E tests
+npm run test:e2e:ui   # Run with Playwright UI
+```
+
+### Test Results
+See [testresults.md](./testresults.md) for the latest test run results and coverage information.

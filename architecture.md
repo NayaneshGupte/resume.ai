@@ -140,9 +140,12 @@ sequenceDiagram
 
 | Component | Technology | Role |
 | :--- | :--- | :--- |
-| **Frontend** | Next.js 14, React, Tailwind | UI Rendering, Routing |
+| **Frontend** | Next.js 16, React, Tailwind | UI Rendering, Routing |
 | **State** | Zustand | Client-side data persistence |
 | **Parsing** | pdfjs-dist, mammoth, tesseract.js | Text extraction & OCR |
 | **Backend** | Next.js Server Actions | API Gateway, Business Logic |
 | **AI Model** | Google Gemini 2.0 Flash | Reasoning, Scoring, Rewriting |
+| **Testing** | Jest, React Testing Library, Playwright | Unit & E2E Testing |
 | **Deployment** | Vercel | Edge Hosting, CI/CD |
+
+

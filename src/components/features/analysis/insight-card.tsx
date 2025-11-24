@@ -46,7 +46,13 @@ export function InsightCard({
                     </Badge>
                 </div>
                 <div className="flex items-center gap-2 mt-2">
-                    <Progress value={percentage} className="h-2" indicatorClassName={getStatusColor(percentage)} />
+                    <Progress
+                        value={percentage}
+                        className={cn(
+                            "h-2",
+                            `[&>[data-slot=progress-indicator]]:${getStatusColor(percentage)}`
+                        )}
+                    />
                     <span className="text-xs font-medium text-muted-foreground w-20 text-right">
                         {getStatusText(percentage)}
                     </span>
