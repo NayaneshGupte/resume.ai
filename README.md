@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Resume AI Platform 🚀
 
-## Getting Started
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Gemini](https://img.shields.io/badge/AI-Gemini%202.0-orange)
+![Tailwind](https://img.shields.io/badge/Tailwind-CSS-38bdf8)
 
-First, run the development server:
+**Resume AI Platform** is an intelligent, privacy-first tool designed to help job seekers and recruiters evaluate resume fit for software industry roles. Powered by **Google Gemini 2.0**, it parses resumes, provides "recruiter-grade" scoring, and offers actionable feedback to improve your chances of getting hired.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📚 Documentation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+We have detailed documentation to help you understand, run, and deploy the project:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **[Product Requirements (PRD)](./PRD.md)**: The vision, problem statement, and detailed feature requirements.
+- **[System Architecture](./architecture.md)**: High-level diagrams and explanation of the tech stack and design choices.
+- **[Code Walkthrough](./CODE_WALKTHROUGH.md)**: A developer's guide to the codebase structure and key data flows.
+- **[Deployment Guide](./DEPLOYMENT.md)**: Step-by-step instructions for running locally and deploying to Vercel.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## ✨ Key Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **📄 Universal Parsing**: Drag-and-drop support for PDF and DOCX files.
+- **👁️ OCR Capabilities**: Automatically handles image-based or scanned resumes using Tesseract.js.
+- **🤖 AI Analysis**: Uses **Gemini 2.0 Flash** to evaluate resumes against specific roles (e.g., SDE, PM).
+- **📊 Smart Scoring**: 100-point scoring system based on Impact, Skills, Experience, and ATS compatibility.
+- **💡 Actionable Insights**: Provides specific "Strengths" and "Areas for Improvement" for every category.
+- **🔒 Privacy First**: All file parsing happens in the browser. Your resume is never stored on our servers.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🛠️ Tech Stack
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) & [Shadcn/UI](https://ui.shadcn.com/)
+- **State Management**: [Zustand](https://github.com/pmndrs/zustand)
+- **AI Model**: [Google Gemini 2.0 Flash](https://deepmind.google/technologies/gemini/)
+- **Parsing**: `pdfjs-dist`, `mammoth`, `tesseract.js`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 🚀 Quick Start
+
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/NayaneshGupte/ResumeAI.git
+    cd ResumeAI
+    ```
+
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
+
+3.  **Set up Environment Variables**:
+    Create a `.env.local` file and add your Gemini API Key:
+    ```env
+    NEXT_PUBLIC_GEMINI_API_KEY=your_api_key_here
+    ```
+
+4.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
+
+5.  Open [http://localhost:3000](http://localhost:3000) to see the app.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check the [Code Walkthrough](./CODE_WALKTHROUGH.md) to understand the project structure before making changes.
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
