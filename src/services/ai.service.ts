@@ -30,7 +30,25 @@ export class AIService {
     }
 
     async analyzeResume(text: string, role: string): Promise<AnalysisResult> {
-        const model = this.genAI.getGenerativeModel({ model: this.modelName });
+        // Try primary model first, fallback to stable model on 429
+        try {
+            return await this.tryAnalyzeWithModel(this.modelName, text, role);
+        } catch (error: any) {
+            if (error.message?.includes("429") || error.status === 429) {
+                console.log("Primary model hit rate limit, trying fallback model...");
+                try {
+                    return await this.tryAnalyzeWithModel("gemini-1.5-flash", text, role);
+                } catch (fallbackError: any) {
+                    console.error("Fallback model also failed:", fallbackError);
+                    throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
+                }
+            }
+            throw error;
+        }
+    }
+
+    private async tryAnalyzeWithModel(modelName: string, text: string, role: string): Promise<AnalysisResult> {
+        const model = this.genAI.getGenerativeModel({ model: modelName });
 
         try {
             let prompt = await this.getPromptTemplate("analyze-resume.txt");
@@ -42,7 +60,7 @@ export class AIService {
 
             return JSON.parse(jsonString) as AnalysisResult;
         } catch (error: any) {
-            console.error("AIService Error (analyzeResume):", error);
+            console.error(`AIService Error (${modelName}):`, error);
 
             if (error.message?.includes("429") || error.status === 429) {
                 throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", error);
@@ -54,7 +72,25 @@ export class AIService {
     }
 
     async generateResumeContent(text: string): Promise<ResumeContent> {
-        const model = this.genAI.getGenerativeModel({ model: this.modelName });
+        // Try primary model first, fallback to stable model on 429
+        try {
+            return await this.tryGenerateWithModel(this.modelName, text);
+        } catch (error: any) {
+            if (error.message?.includes("429") || error.status === 429) {
+                console.log("Primary model hit rate limit, trying fallback model...");
+                try {
+                    return await this.tryGenerateWithModel("gemini-1.5-flash", text);
+                } catch (fallbackError: any) {
+                    console.error("Fallback model also failed:", fallbackError);
+                    throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
+                }
+            }
+            throw error;
+        }
+    }
+
+    private async tryGenerateWithModel(modelName: string, text: string): Promise<ResumeContent> {
+        const model = this.genAI.getGenerativeModel({ model: modelName });
 
         try {
             let prompt = await this.getPromptTemplate("generate-resume.txt");
@@ -66,7 +102,7 @@ export class AIService {
 
             return JSON.parse(jsonString) as ResumeContent;
         } catch (error: any) {
-            console.error("AIService Error (generateResumeContent):", error);
+            console.error(`AIService Error (${modelName}):`, error);
 
             if (error.message?.includes("429") || error.status === 429) {
                 throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", error);
