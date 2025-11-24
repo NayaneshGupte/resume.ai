@@ -23,7 +23,7 @@ export class AIService {
         }
 
         if (openaiKey) {
-            this.openai = new OpenAI({ apiKey: openaiKey, dangerouslyAllowBrowser: true });
+            this.openai = new OpenAI({ apiKey: openaiKey });
         }
     }
 
