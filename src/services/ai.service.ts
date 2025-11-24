@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs/promises";
 import path from "path";
 import { AnalysisResult, ResumeContent } from "@/types/resume";
+import { AIError } from "@/lib/errors";
 
 export class AIService {
     private genAI: GoogleGenerativeAI;
@@ -9,7 +10,7 @@ export class AIService {
 
     constructor(apiKey: string) {
         if (!apiKey) {
-            throw new Error("NEXT_PUBLIC_GEMINI_API_KEY is not set");
+            throw new AIError("NEXT_PUBLIC_GEMINI_API_KEY is not set");
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
     }
@@ -20,7 +21,7 @@ export class AIService {
             return await fs.readFile(filePath, "utf-8");
         } catch (error) {
             console.error(`Error reading prompt file ${filename}:`, error);
-            throw new Error(`Failed to load prompt template: ${filename}`);
+            throw new AIError(`Failed to load prompt template: ${filename}`, error);
         }
     }
 
@@ -44,11 +45,11 @@ export class AIService {
             console.error("AIService Error (analyzeResume):", error);
 
             if (error.message?.includes("429") || error.status === 429) {
-                throw new Error("AI Usage Limit Exceeded. Please wait a minute and try again.");
+                throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", error);
             }
 
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            throw new Error(`Failed to analyze resume: ${errorMessage}`);
+            throw new AIError(`Failed to analyze resume: ${errorMessage}`, error);
         }
     }
 
@@ -68,10 +69,10 @@ export class AIService {
             console.error("AIService Error (generateResumeContent):", error);
 
             if (error.message?.includes("429") || error.status === 429) {
-                throw new Error("AI Usage Limit Exceeded. Please wait a minute and try again.");
+                throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", error);
             }
 
-            throw new Error("Failed to generate resume content");
+            throw new AIError("Failed to generate resume content", error);
         }
     }
 }

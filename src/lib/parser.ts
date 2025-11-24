@@ -1,6 +1,7 @@
 import * as pdfjsLib from "pdfjs-dist";
 import mammoth from "mammoth";
 import Tesseract from "tesseract.js";
+import { ValidationError } from "@/lib/errors";
 
 // Initialize PDF.js worker
 if (typeof window !== "undefined") {
@@ -18,7 +19,7 @@ export async function parseResume(file: File): Promise<string> {
     ) {
         return parseDOCX(file);
     } else {
-        throw new Error("Unsupported file type");
+        throw new ValidationError("Unsupported file type. Please upload a PDF or DOCX file.");
     }
 }
 

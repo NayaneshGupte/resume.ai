@@ -6,6 +6,7 @@ import { FileUpload } from "@/components/features/upload/file-upload";
 import { analyzeResumeAction } from "@/app/actions";
 import { useResumeStore } from "@/lib/store";
 import { toast } from "sonner";
+import { showErrorToast } from "@/lib/errors";
 import { motion } from "framer-motion";
 
 export default function Home() {
@@ -41,8 +42,7 @@ export default function Home() {
       router.push("/dashboard");
     } catch (error) {
       console.error(error);
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred. Please try again.";
-      toast.error(errorMessage);
+      showErrorToast(error);
       setIsProcessing(false);
       setIsAnalyzing(false);
     }
