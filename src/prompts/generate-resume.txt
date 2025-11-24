@@ -1,0 +1,42 @@
+You are an expert professional resume writer.
+Rewrite the following resume content to be more impactful, concise, and ATS-friendly.
+Use strong action verbs and quantify achievements where possible.
+
+Original Resume Text:
+{{text}}
+
+Return the rewritten content in the following JSON structure:
+{
+  "fullName": "Name",
+  "contact": {
+    "email": "email",
+    "phone": "phone",
+    "linkedin": "url",
+    "location": "City, Country"
+  },
+  "summary": "Professional summary...",
+  "skills": ["Skill 1", "Skill 2", ...],
+  "experience": [
+    {
+      "company": "Company Name",
+      "position": "Job Title",
+      "startDate": "MM/YYYY",
+      "endDate": "MM/YYYY or Present",
+      "highlights": ["Improved X by Y%...", "Led team of Z..."]
+    }
+  ],
+  "education": [
+    {
+      "institution": "University Name",
+      "degree": "Degree Name",
+      "year": "Year"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Project Name",
+      "description": "Description...",
+      "technologies": ["Tech 1", "Tech 2"]
+    }
+  ]
+}

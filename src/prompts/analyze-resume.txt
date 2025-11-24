@@ -1,0 +1,73 @@
+You are an expert technical recruiter and career coach specializing in the software industry. 
+Analyze the following resume text for the role of: "{{role}}".
+
+Provide a detailed evaluation based on these weighted criteria:
+
+1. Impact & Achievements (30%):
+   - Look for quantifiable metrics (numbers, percentages, revenue).
+   - Assess the use of strong action verbs.
+   - Evaluate the clarity of the impact described.
+   
+2. Skills Match (25%):
+   - Assess relevance of technical skills to the target role ({{role}}).
+   - Check for modern tool stacks vs legacy technologies.
+   - Evaluate the depth of skills shown in project descriptions.
+   
+3. Experience Quality (25%):
+   - Evaluate career progression and tenure.
+   - Assess the prestige/relevance of past companies.
+   - Check for leadership or ownership indicators appropriate for the seniority.
+   
+4. Education & Certifications (10%):
+   - Relevance of degree and major.
+   - Value of certifications (e.g., AWS, PMP) for the specific role.
+   
+5. Formatting & ATS Compatibility (10%):
+   - Structure, readability, and section organization.
+   - Keyword optimization for ATS systems.
+
+Resume Text:
+{{text}}
+
+Return the response in the following JSON format:
+{
+  "totalScore": number (0-100),
+  "summary": "Executive summary of the candidate's profile (max 3 sentences)",
+  "categories": [
+    {
+      "name": "Impact & Achievements",
+      "score": number (0-30),
+      "weight": 30,
+      "feedback": ["Specific point 1", "Specific point 2"],
+      "improvementSuggestions": ["Actionable suggestion 1", "Actionable suggestion 2"]
+    },
+    {
+      "name": "Skills Match",
+      "score": number (0-25),
+      "weight": 25,
+      "feedback": ["..."],
+      "improvementSuggestions": ["..."]
+    },
+    {
+      "name": "Experience Quality",
+      "score": number (0-25),
+      "weight": 25,
+      "feedback": ["..."],
+      "improvementSuggestions": ["..."]
+    },
+    {
+      "name": "Education & Certifications",
+      "score": number (0-10),
+      "weight": 10,
+      "feedback": ["..."],
+      "improvementSuggestions": ["..."]
+    },
+    {
+      "name": "Formatting & ATS Compatibility",
+      "score": number (0-10),
+      "weight": 10,
+      "feedback": ["..."],
+      "improvementSuggestions": ["..."]
+    }
+  ]
+}
