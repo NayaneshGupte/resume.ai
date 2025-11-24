@@ -4,7 +4,8 @@ import Tesseract from "tesseract.js";
 
 // Initialize PDF.js worker
 if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    // Use local worker file for better reliability
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 }
 
 export async function parseResume(file: File): Promise<string> {
