@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Anthropic from "@anthropic-ai/sdk";
 import fs from "fs/promises";
 import path from "path";
 import { AnalysisResult, ResumeContent } from "@/types/resume";
@@ -6,13 +7,18 @@ import { AIError } from "@/lib/errors";
 
 export class AIService {
     private genAI: GoogleGenerativeAI;
+    private anthropic: Anthropic | null = null;
     private modelName = "gemini-2.0-flash-exp";
 
-    constructor(apiKey: string) {
+    constructor(apiKey: string, anthropicKey?: string) {
         if (!apiKey) {
             throw new AIError("NEXT_PUBLIC_GEMINI_API_KEY is not set");
         }
         this.genAI = new GoogleGenerativeAI(apiKey);
+
+        if (anthropicKey) {
+            this.anthropic = new Anthropic({ apiKey: anthropicKey });
+        }
     }
 
     private async getPromptTemplate(filename: string): Promise<string> {
@@ -30,16 +36,24 @@ export class AIService {
     }
 
     async analyzeResume(text: string, role: string): Promise<AnalysisResult> {
-        // Try primary model first, fallback to stable model on 429
+        // Try Gemini 2.0 → Gemini 1.5 → Claude 3.5
         try {
             return await this.tryAnalyzeWithModel(this.modelName, text, role);
         } catch (error: any) {
             if (error.message?.includes("429") || error.status === 429) {
-                console.log("Primary model hit rate limit, trying fallback model...");
+                console.log("Primary model hit rate limit, trying Gemini 1.5 Flash...");
                 try {
                     return await this.tryAnalyzeWithModel("gemini-1.5-flash", text, role);
                 } catch (fallbackError: any) {
-                    console.error("Fallback model also failed:", fallbackError);
+                    if ((fallbackError.message?.includes("429") || fallbackError.status === 429) && this.anthropic) {
+                        console.log("Gemini fallback also hit rate limit, trying Claude...");
+                        try {
+                            return await this.tryAnalyzeWithClaude(text, role);
+                        } catch (claudeError: any) {
+                            console.error("All models failed:", claudeError);
+                            throw new AIError("All AI providers are currently unavailable. Please try again later.", claudeError);
+                        }
+                    }
                     throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
                 }
             }
@@ -71,17 +85,53 @@ export class AIService {
         }
     }
 
+    private async tryAnalyzeWithClaude(text: string, role: string): Promise<AnalysisResult> {
+        if (!this.anthropic) {
+            throw new AIError("Anthropic API key not configured");
+        }
+
+        try {
+            let prompt = await this.getPromptTemplate("analyze-resume.txt");
+            prompt = prompt.replace(/{{role}}/g, role).replace("{{text}}", text);
+
+            const message = await this.anthropic.messages.create({
+                model: "claude-3-5-sonnet-20241022",
+                max_tokens: 4096,
+                messages: [{ role: "user", content: prompt }],
+            });
+
+            const content = message.content[0];
+            if (content.type !== "text") {
+                throw new Error("Unexpected response type from Claude");
+            }
+
+            const jsonString = this.cleanJsonOutput(content.text);
+            return JSON.parse(jsonString) as AnalysisResult;
+        } catch (error: any) {
+            console.error("Claude Error:", error);
+            throw new AIError("Failed to analyze with Claude", error);
+        }
+    }
+
     async generateResumeContent(text: string): Promise<ResumeContent> {
-        // Try primary model first, fallback to stable model on 429
+        // Try Gemini 2.0 → Gemini 1.5 → Claude 3.5
         try {
             return await this.tryGenerateWithModel(this.modelName, text);
         } catch (error: any) {
             if (error.message?.includes("429") || error.status === 429) {
-                console.log("Primary model hit rate limit, trying fallback model...");
+                console.log("Primary model hit rate limit, trying Gemini 1.5 Flash...");
                 try {
                     return await this.tryGenerateWithModel("gemini-1.5-flash", text);
                 } catch (fallbackError: any) {
-                    console.error("Fallback model also failed:", fallbackError);
+                    if ((fallbackError.message?.includes("429") || fallbackError.status === 429) && this.anthropic) {
+                        console.log("Gemini fallback also hit rate limit, trying Claude...");
+                        try {
+                            return await this.tryGenerateWithClaude(text);
+                        } catch (claudeError: any) {
+                            console.error("All models failed:", claudeError);
+                            throw new AIError("All AI providers are currently unavailable. Please try again later.", claudeError);
+                        }
+                    }
                     throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
                 }
             }
@@ -111,6 +161,37 @@ export class AIService {
             throw new AIError("Failed to generate resume content", error);
         }
     }
+
+    private async tryGenerateWithClaude(text: string): Promise<ResumeContent> {
+        if (!this.anthropic) {
+            throw new AIError("Anthropic API key not configured");
+        }
+
+        try {
+            let prompt = await this.getPromptTemplate("generate-resume.txt");
+            prompt = prompt.replace("{{text}}", text);
+
+            const message = await this.anthropic.messages.create({
+                model: "claude-3-5-sonnet-20241022",
+                max_tokens: 4096,
+                messages: [{ role: "user", content: prompt }],
+            });
+
+            const content = message.content[0];
+            if (content.type !== "text") {
+                throw new Error("Unexpected response type from Claude");
+            }
+
+            const jsonString = this.cleanJsonOutput(content.text);
+            return JSON.parse(jsonString) as ResumeContent;
+        } catch (error: any) {
+            console.error("Claude Error:", error);
+            throw new AIError("Failed to generate with Claude", error);
+        }
+    }
 }
 
-export const aiService = new AIService(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+export const aiService = new AIService(
+    process.env.NEXT_PUBLIC_GEMINI_API_KEY || "",
+    process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY
+);
