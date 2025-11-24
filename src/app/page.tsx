@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FileUpload } from "@/components/features/upload/file-upload";
-import { parseResume } from "@/lib/parser";
 import { analyzeResumeAction } from "@/app/actions";
 import { useResumeStore } from "@/lib/store";
 import { toast } from "sonner";
@@ -21,6 +20,9 @@ export default function Home() {
       setFile(file);
 
       toast.info("Parsing resume...");
+
+      // Dynamically import parser to avoid SSR issues
+      const { parseResume } = await import("@/lib/parser");
       const text = await parseResume(file);
       setText(text);
 

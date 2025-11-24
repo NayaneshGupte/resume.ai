@@ -4,7 +4,6 @@ import Tesseract from "tesseract.js";
 
 // Initialize PDF.js worker
 if (typeof window !== "undefined") {
-    // @ts-ignore
     pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 }
 
@@ -31,7 +30,15 @@ async function parsePDF(file: File): Promise<string> {
     for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item: any) => item.str).join(" ");
+        const pageText = textContent.items
+            .map((item) => {
+                // Type guard for TextItem (has str property)
+                if ('str' in item) {
+                    return (item as { str: string }).str;
+                }
+                return '';
+            })
+            .join(" ");
 
         if (pageText.trim().length > 50) {
             hasText = true;
@@ -48,7 +55,7 @@ async function parsePDF(file: File): Promise<string> {
     return fullText;
 }
 
-async function performOCR(pdf: any): Promise<string> {
+async function performOCR(pdf: Awaited<ReturnType<typeof pdfjsLib.getDocument>['promise']>): Promise<string> {
     let fullText = "";
 
     for (let i = 1; i <= pdf.numPages; i++) {
@@ -62,7 +69,11 @@ async function performOCR(pdf: any): Promise<string> {
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        await page.render({ canvasContext: context, viewport: viewport }).promise;
+        await page.render({
+            canvas: canvas,
+            canvasContext: context,
+            viewport: viewport,
+        }).promise;
         const result = await Tesseract.recognize(canvas, "eng");
         fullText += result.data.text + "\n";
     }
