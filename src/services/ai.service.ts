@@ -52,7 +52,11 @@ export class AIService {
                     try {
                         return await this.tryAnalyzeWithOpenAI(text, role);
                     } catch (openaiError: any) {
-                        console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
+                        if (openaiError.message?.includes("429") || openaiError.status === 429) {
+                            console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
+                        } else {
+                            throw new AIError(`OpenAI GPT-4o Mini failed: ${openaiError.message}`, openaiError);
+                        }
                     }
                 }
 
@@ -65,13 +69,13 @@ export class AIService {
                             return await this.tryAnalyzeWithClaude(text, role);
                         } catch (claudeError: any) {
                             console.error("All models failed:", claudeError);
-                            throw new AIError("All AI providers are currently unavailable. Please try again later.", claudeError);
+                            throw new AIError("All AI providers (Gemini 2.0, OpenAI GPT-4, Gemini 1.5, Claude 3.5) are currently unavailable. Please try again later.", claudeError);
                         }
                     }
-                    throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
+                    throw new AIError("Gemini models hit rate limit. Please wait a minute and try again.", fallbackError);
                 }
             }
-            throw error;
+            throw new AIError(`Gemini 2.0 Flash Exp failed: ${error.message}`, error);
         }
     }
 
@@ -171,7 +175,11 @@ export class AIService {
                     try {
                         return await this.tryGenerateWithOpenAI(text);
                     } catch (openaiError: any) {
-                        console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
+                        if (openaiError.message?.includes("429") || openaiError.status === 429) {
+                            console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
+                        } else {
+                            throw new AIError(`OpenAI GPT-4o Mini failed: ${openaiError.message}`, openaiError);
+                        }
                     }
                 }
 
@@ -184,13 +192,13 @@ export class AIService {
                             return await this.tryGenerateWithClaude(text);
                         } catch (claudeError: any) {
                             console.error("All models failed:", claudeError);
-                            throw new AIError("All AI providers are currently unavailable. Please try again later.", claudeError);
+                            throw new AIError("All AI providers (Gemini 2.0, OpenAI GPT-4, Gemini 1.5, Claude 3.5) are currently unavailable. Please try again later.", claudeError);
                         }
                     }
-                    throw new AIError("AI Usage Limit Exceeded. Please wait a minute and try again.", fallbackError);
+                    throw new AIError("Gemini 1.5 Flash failed: Please wait a minute and try again.", fallbackError);
                 }
             }
-            throw error;
+            throw new AIError(`Gemini 2.0 Flash Exp failed: ${error.message}`, error);
         }
     }
 
