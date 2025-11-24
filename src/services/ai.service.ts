@@ -43,40 +43,45 @@ export class AIService {
 
     async analyzeResume(text: string, role: string): Promise<AnalysisResult> {
         // Try Gemini 2.0 → OpenAI GPT-4 → Gemini 1.5 → Claude 3.5
+        const errors: string[] = [];
+
+        // Try Gemini 2.0
         try {
             return await this.tryAnalyzeWithGemini(this.modelName, text, role);
         } catch (error: any) {
-            if (error.message?.includes("429") || error.status === 429) {
-                console.log("Gemini 2.0 hit rate limit, trying OpenAI GPT-4...");
-                if (this.openai) {
-                    try {
-                        return await this.tryAnalyzeWithOpenAI(text, role);
-                    } catch (openaiError: any) {
-                        if (openaiError.message?.includes("429") || openaiError.status === 429) {
-                            console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
-                        } else {
-                            throw new AIError(`OpenAI GPT-4o Mini failed: ${openaiError.message}`, openaiError);
-                        }
-                    }
-                }
-
-                try {
-                    return await this.tryAnalyzeWithGemini("gemini-1.5-flash", text, role);
-                } catch (fallbackError: any) {
-                    if ((fallbackError.message?.includes("429") || fallbackError.status === 429) && this.anthropic) {
-                        console.log("Gemini 1.5 also hit rate limit, trying Claude...");
-                        try {
-                            return await this.tryAnalyzeWithClaude(text, role);
-                        } catch (claudeError: any) {
-                            console.error("All models failed:", claudeError);
-                            throw new AIError("All AI providers (Gemini 2.0, OpenAI GPT-4, Gemini 1.5, Claude 3.5) are currently unavailable. Please try again later.", claudeError);
-                        }
-                    }
-                    throw new AIError("Gemini models hit rate limit. Please wait a minute and try again.", fallbackError);
-                }
-            }
-            throw new AIError(`Gemini 2.0 Flash Exp failed: ${error.message}`, error);
+            errors.push(`Gemini 2.0: ${error.message}`);
+            console.log("Gemini 2.0 failed, trying OpenAI GPT-4...");
         }
+
+        // Try OpenAI GPT-4
+        if (this.openai) {
+            try {
+                return await this.tryAnalyzeWithOpenAI(text, role);
+            } catch (error: any) {
+                errors.push(`OpenAI GPT-4: ${error.message}`);
+                console.log("OpenAI failed, trying Gemini 1.5 Flash...");
+            }
+        }
+
+        // Try Gemini 1.5
+        try {
+            return await this.tryAnalyzeWithGemini("gemini-1.5-flash", text, role);
+        } catch (error: any) {
+            errors.push(`Gemini 1.5: ${error.message}`);
+            console.log("Gemini 1.5 failed, trying Claude...");
+        }
+
+        // Try Claude 3.5
+        if (this.anthropic) {
+            try {
+                return await this.tryAnalyzeWithClaude(text, role);
+            } catch (error: any) {
+                errors.push(`Claude 3.5: ${error.message}`);
+            }
+        }
+
+        // All models failed
+        throw new AIError(`All AI providers failed:\n${errors.join('\n')}`);
     }
 
     private async tryAnalyzeWithGemini(modelName: string, text: string, role: string): Promise<AnalysisResult> {
@@ -166,40 +171,45 @@ export class AIService {
 
     async generateResumeContent(text: string): Promise<ResumeContent> {
         // Try Gemini 2.0 → OpenAI GPT-4 → Gemini 1.5 → Claude 3.5
+        const errors: string[] = [];
+
+        // Try Gemini 2.0
         try {
             return await this.tryGenerateWithGemini(this.modelName, text);
         } catch (error: any) {
-            if (error.message?.includes("429") || error.status === 429) {
-                console.log("Gemini 2.0 hit rate limit, trying OpenAI GPT-4...");
-                if (this.openai) {
-                    try {
-                        return await this.tryGenerateWithOpenAI(text);
-                    } catch (openaiError: any) {
-                        if (openaiError.message?.includes("429") || openaiError.status === 429) {
-                            console.log("OpenAI also hit rate limit, trying Gemini 1.5 Flash...");
-                        } else {
-                            throw new AIError(`OpenAI GPT-4o Mini failed: ${openaiError.message}`, openaiError);
-                        }
-                    }
-                }
-
-                try {
-                    return await this.tryGenerateWithGemini("gemini-1.5-flash", text);
-                } catch (fallbackError: any) {
-                    if ((fallbackError.message?.includes("429") || fallbackError.status === 429) && this.anthropic) {
-                        console.log("Gemini 1.5 also hit rate limit, trying Claude...");
-                        try {
-                            return await this.tryGenerateWithClaude(text);
-                        } catch (claudeError: any) {
-                            console.error("All models failed:", claudeError);
-                            throw new AIError("All AI providers (Gemini 2.0, OpenAI GPT-4, Gemini 1.5, Claude 3.5) are currently unavailable. Please try again later.", claudeError);
-                        }
-                    }
-                    throw new AIError("Gemini 1.5 Flash failed: Please wait a minute and try again.", fallbackError);
-                }
-            }
-            throw new AIError(`Gemini 2.0 Flash Exp failed: ${error.message}`, error);
+            errors.push(`Gemini 2.0: ${error.message}`);
+            console.log("Gemini 2.0 failed, trying OpenAI GPT-4...");
         }
+
+        // Try OpenAI GPT-4
+        if (this.openai) {
+            try {
+                return await this.tryGenerateWithOpenAI(text);
+            } catch (error: any) {
+                errors.push(`OpenAI GPT-4: ${error.message}`);
+                console.log("OpenAI failed, trying Gemini 1.5 Flash...");
+            }
+        }
+
+        // Try Gemini 1.5
+        try {
+            return await this.tryGenerateWithGemini("gemini-1.5-flash", text);
+        } catch (error: any) {
+            errors.push(`Gemini 1.5: ${error.message}`);
+            console.log("Gemini 1.5 failed, trying Claude...");
+        }
+
+        // Try Claude 3.5
+        if (this.anthropic) {
+            try {
+                return await this.tryGenerateWithClaude(text);
+            } catch (error: any) {
+                errors.push(`Claude 3.5: ${error.message}`);
+            }
+        }
+
+        // All models failed
+        throw new AIError(`All AI providers failed:\n${errors.join('\n')}`);
     }
 
     private async tryGenerateWithGemini(modelName: string, text: string): Promise<ResumeContent> {
