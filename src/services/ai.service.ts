@@ -40,9 +40,15 @@ export class AIService {
             const jsonString = this.cleanJsonOutput(response.text());
 
             return JSON.parse(jsonString) as AnalysisResult;
-        } catch (error) {
+        } catch (error: any) {
             console.error("AIService Error (analyzeResume):", error);
-            throw new Error("Failed to analyze resume");
+
+            if (error.message?.includes("429") || error.status === 429) {
+                throw new Error("AI Usage Limit Exceeded. Please wait a minute and try again.");
+            }
+
+            const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            throw new Error(`Failed to analyze resume: ${errorMessage}`);
         }
     }
 
@@ -58,8 +64,13 @@ export class AIService {
             const jsonString = this.cleanJsonOutput(response.text());
 
             return JSON.parse(jsonString) as ResumeContent;
-        } catch (error) {
+        } catch (error: any) {
             console.error("AIService Error (generateResumeContent):", error);
+
+            if (error.message?.includes("429") || error.status === 429) {
+                throw new Error("AI Usage Limit Exceeded. Please wait a minute and try again.");
+            }
+
             throw new Error("Failed to generate resume content");
         }
     }
